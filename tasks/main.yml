@@ -1,0 +1,12 @@
+---
+- find:
+    paths: "{{ docker_compose_composer_local_services_path }}/{{ inventory_hostname}}"
+    recurse: no
+    file_type: directory
+  register: found_dirs
+  delegate_to: localhost
+
+- name: Loop over composer
+  include_tasks: composer.yml
+  loop: "{{ found_dirs.files }}"
+

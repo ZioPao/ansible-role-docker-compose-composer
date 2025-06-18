@@ -1,0 +1,29 @@
+---
+# get service name, item is full path
+
+- name: Define service folder in {{ compose_path }}/{{ item.path | basename }}
+  set_fact:
+    dest_service_path: >-
+      "{{ compose_path }}/{{ item.path | basename }}"
+
+- name: Create stack directory if it doesn't exist
+  file:
+    path: "{{ dest_service_path }}"
+    state: directory
+
+- name: Move additional files for compose
+  copy:
+    src: "{{ item.path }}/"
+    dest: "{{ dest_service_path }}"
+
+- name: Add template files to dest
+  template:
+    src: "{{ item.path }}/docker-compose.yaml"
+    dest: "{{ dest_service_path }}/docker-compose.yaml"
+    owner: "{{ docker_compose_composer_uid }}"
+    group: "{{ docker_compose_composer_gid }}"
+
+
+- name: Create and start service - {{ item.path | basename}}
+  community.docker.docker_compose_v2:
+    project_src: "{{ dest_service_path }}"
