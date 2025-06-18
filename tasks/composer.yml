@@ -32,6 +32,7 @@
     project_src: "{{ dest_service_path }}"
     state: absent
   become: true
+  when: docker_compose_composer_redeploy
 
 - name: Create and start service - {{ item.path | basename }}
   community.docker.docker_compose_v2:
