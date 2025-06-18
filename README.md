@@ -23,6 +23,9 @@ docker_compose_composer_local_services_path: "services"
 # Directory where templatized compose and its other files are going to be placed
 docker_compose_composer_dest_path: "~"
 
+# Directory where appdata is stored
+docker_compose_composer_appdata_path: "~"
+
 # UID for dest path
 docker_compose_composer_uid: 1000
 
@@ -44,6 +47,7 @@ Here's an example of how to use this role:
         docker_compose_composer_uid: 1000
         docker_compose_composer_gid: 1000
         docker_compose_composer_dest_path: "~"
+        docker_compose_composer_appdata_path: "~"
 ```
 
 What This Role Does

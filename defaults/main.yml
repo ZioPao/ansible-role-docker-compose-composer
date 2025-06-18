@@ -3,3 +3,4 @@ docker_compose_composer_local_services_path: "services"
 docker_compose_composer_uid: 1000
 docker_compose_composer_gid: 1000
 docker_compose_composer_dest_path: "~"
+docker_compose_composer_appdata_path: "~"
