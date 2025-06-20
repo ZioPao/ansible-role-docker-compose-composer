@@ -5,6 +5,11 @@
     dest_service_path: >-
       {{ docker_compose_composer_dest_path }}/{{ item.path | basename }}
 
+- name: Set correct domain
+  set_fact:
+    full_domain: >-
+      {{ subdomain }}.{{ S_domain }}
+
 - name: Create compose stack directory if it doesn't exist - {{ dest_service_path }}
   file:
     path: "{{ dest_service_path }}"
