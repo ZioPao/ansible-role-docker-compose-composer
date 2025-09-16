@@ -1,45 +1,54 @@
 ---
-# get service name, item is full path
-- name: Define service folder = {{ docker_compose_composer_dest_path }}/{{ item.path | basename }}
-  set_fact:
-    dest_service_path: >-
-      {{ docker_compose_composer_dest_path }}/{{ item.path | basename }}
+- name: Check if service is to be ignored
+  when:
+    - (inventory_hostname not in docker_compose_composer_deploy_only) or
+      (item.path | basename in docker_compose_composer_deploy_only[inventory_hostname])
+  block:
+    # get service name, item is full path
+    - name: Define service folder = {{ docker_compose_composer_dest_path }}/{{ item.path | basename }}
+      ansible.builtin.set_fact:
+        dest_service_path: >-
+          {{ docker_compose_composer_dest_path }}/{{ item.path | basename }}
 
-- name: Set correct domain
-  set_fact:
-    full_domain: >-
-      {{ subdomain }}.{{ S_domain }}
+    - name: Set correct domain
+      ansible.builtin.set_fact:
+        full_domain: >-
+          {{ subdomain }}.{{ S_domain }}
 
-- name: Create compose stack directory if it doesn't exist - {{ dest_service_path }}
-  file:
-    path: "{{ dest_service_path }}"
-    state: directory
-    owner: "{{ docker_compose_composer_uid }}"
-    group: "{{ docker_compose_composer_gid }}"
-    mode: '0755'
+    - name: Create compose stack directory if it doesn't exist - {{ dest_service_path }}
+      ansible.builtin.file:
+        path: "{{ dest_service_path }}"
+        state: directory
+        owner: "{{ docker_compose_composer_uid }}"
+        group: "{{ docker_compose_composer_gid }}"
+        mode: '0755'
 
-- name: Move additional files for compose
-  copy:
-    src: "{{ item.path }}/"
-    dest: "{{ dest_service_path }}"
-    owner: "{{ docker_compose_composer_uid }}"
-    group: "{{ docker_compose_composer_gid }}"
+    - name: Move additional files for compose
+      ansible.builtin.copy:
+        src: "{{ item.path }}/"
+        dest: "{{ dest_service_path }}"
+        owner: "{{ docker_compose_composer_uid }}"
+        group: "{{ docker_compose_composer_gid }}"
 
-- name: Add template files to dest
-  template:
-    src: "{{ item.path }}/docker-compose.yml"
-    dest: "{{ dest_service_path }}/docker-compose.yml"
-    owner: "{{ docker_compose_composer_uid }}"
-    group: "{{ docker_compose_composer_gid }}"
 
-- name: Destroy pre-existing service - {{ item.path | basename }}
-  community.docker.docker_compose_v2:
-    project_src: "{{ dest_service_path }}"
-    state: absent
-  become: true
-  when: docker_compose_composer_redeploy
+      # TODO Do the same for .env files
+    - name: Add template files to dest
+      ansible.builtin.template:
+        src: "{{ item.path }}/docker-compose.yml"
+        dest: "{{ dest_service_path }}/docker-compose.yml"
+        owner: "{{ docker_compose_composer_uid }}"
+        group: "{{ docker_compose_composer_gid }}"
 
-- name: Create and start service - {{ item.path | basename }}
-  community.docker.docker_compose_v2:
-    project_src: "{{ dest_service_path }}"
-  become: true
+    - name: Destroy pre-existing service - {{ item.path | basename }}
+      community.docker.docker_compose_v2:
+        project_src: "{{ dest_service_path }}"
+        state: absent
+      become: true
+      when: 
+        - docker_compose_composer_redeploy
+
+    - name: Create and start service - {{ item.path | basename }}
+      community.docker.docker_compose_v2:
+        project_src: "{{ dest_service_path }}"
+        remove_orphans: true
+      become: true

@@ -5,3 +5,4 @@ docker_compose_composer_gid: 1000
 docker_compose_composer_dest_path: "~"
 docker_compose_composer_appdata_path: "~"
 docker_compose_composer_redeploy: true
+docker_compose_composer_deploy_only: {}
