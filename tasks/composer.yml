@@ -51,4 +51,5 @@
       community.docker.docker_compose_v2:
         project_src: "{{ dest_service_path }}"
         remove_orphans: true
+        pull: always
       become: true
