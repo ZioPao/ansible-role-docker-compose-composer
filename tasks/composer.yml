@@ -22,6 +22,7 @@
         owner: "{{ docker_compose_composer_uid }}"
         group: "{{ docker_compose_composer_gid }}"
         mode: '0755'
+      become: true
 
     - name: Move additional files for compose
       ansible.builtin.copy:
@@ -29,7 +30,7 @@
         dest: "{{ dest_service_path }}"
         owner: "{{ docker_compose_composer_uid }}"
         group: "{{ docker_compose_composer_gid }}"
-
+      become: true
 
       # TODO Do the same for .env files
     - name: Add template files to dest
@@ -38,7 +39,8 @@
         dest: "{{ dest_service_path }}/docker-compose.yml"
         owner: "{{ docker_compose_composer_uid }}"
         group: "{{ docker_compose_composer_gid }}"
-
+      become: true
+      
     - name: Destroy pre-existing service - {{ item.path | basename }}
       community.docker.docker_compose_v2:
         project_src: "{{ dest_service_path }}"
